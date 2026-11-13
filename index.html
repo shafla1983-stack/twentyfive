@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Twenty-Five Family Table</title>
+<title>25 and 31 Family Table</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
@@ -68,7 +68,8 @@ button { cursor: pointer; }
 .page { max-width: 560px; margin: 0 auto; padding: 28px 18px 40px; display: flex; flex-direction: column; gap: 22px; }
 .mast { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: end; }
 .mast .for { grid-column: 1 / -1; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
-.mast h1 { font-size: clamp(38px, 11.5vw, 64px); line-height: .95; white-space: nowrap; }
+.mast h1 .amp { color: var(--brass); }
+.mast h1 { font-size: clamp(48px, 16vw, 76px); line-height: .95; white-space: nowrap; }
 .mast .lede { grid-column: 1 / -1; color: var(--chalk-dim); max-width: 46ch; }
 .fan { display: flex; padding: 6px 10px 0 0; }
 .fan .card { --w: 46px; margin-left: -16px; transform-origin: 50% 120%; }
@@ -155,6 +156,24 @@ button { cursor: pointer; }
 .conn { color: var(--brass); font-weight: 600; }
 .invite { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; border: 1px dashed var(--brass); }
 .invite-link { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+.rules { display: flex; flex-direction: column; gap: 14px; }
+.gamepick button { font: 600 15px var(--body); }
+.gamepick:empty { display: none; }
+.pile { max-width: none; }
+.pile .card { --w: 68px; }
+.pilebtn { background: none; border: 0; padding: 0; border-radius: 9px; }
+.pilebtn:not(:disabled) .card { box-shadow: 0 0 0 3px var(--brass), 0 6px 14px rgba(0,0,0,.4); }
+.card.back { background: repeating-linear-gradient(45deg, #7a1f1a 0 6px, #8f2a22 6px 12px); border: 4px solid var(--card); }
+.card.empty { background: none; box-shadow: none; border: 2px dashed var(--line); }
+.showdown { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 340px; }
+.show { display: grid; grid-template-columns: minmax(0, 1fr) auto 44px; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 9px; background: rgba(0,0,0,.2); text-align: left; }
+.show .who { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.show .who small { display: block; font-weight: 600; font-size: 12px; color: #ff9d94; }
+.show .cards { display: flex; gap: 4px; }
+.show .cards .card { --w: 34px; box-shadow: none; }
+.show b { font-family: var(--display); font-weight: 400; font-size: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.show.lost { outline: 1px solid #ff9d94; }
+.felt { justify-content: safe center; }
 #toast { position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%); background: var(--chalk); color: var(--baize-deep); font-weight: 600; font-size: 14px;
   padding: 10px 14px; border-radius: 10px; max-width: calc(100% - 32px); text-align: center; z-index: 6; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
@@ -164,10 +183,10 @@ button { cursor: pointer; }
 
 <main id="home" class="page">
   <header class="mast">
-    <p class="for">Irish 25 for two to ten players</p>
-    <h1>Twenty-Five</h1>
+    <p class="for">Two Irish card games for two to ten players</p>
+    <h1>25 <span class="amp">&amp;</span> 31</h1>
     <div class="fan" aria-label="The five, knave and ace of hearts" id="fan"></div>
-    <p class="lede">Five tricks a hand, five points a trick, first to 25 takes the game. The five, the knave and the ace of hearts rule the table.</p>
+    <p class="lede">Twenty-Five for tricks and trumps, Thirty-One for knocking and nerve. Open a table, send the link, and deal the family in.</p>
   </header>
 
   <section class="panel" aria-labelledby="family-h">
@@ -182,6 +201,9 @@ button { cursor: pointer; }
   <section class="panel" aria-labelledby="practice-h">
     <h2 id="practice-h">Practise against the computer</h2>
     <div class="row">
+      <label class="field" for="pgame">Game
+        <select id="pgame"><option value="25">Twenty-Five</option><option value="31">Thirty-One</option></select>
+      </label>
       <label class="field" for="bots">Computer players
         <select id="bots">
           <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
@@ -192,7 +214,7 @@ button { cursor: pointer; }
     </div>
   </section>
 
-  <button class="link" data-act="rules">How to play Twenty-Five</button>
+  <button class="link" data-act="rules">How to play</button>
 </main>
 
 <main id="lobby" class="page" hidden>
@@ -212,6 +234,7 @@ button { cursor: pointer; }
         <button class="btn small" data-act="share" id="share-btn">Share</button>
       </div>
     </div>
+    <div class="suits gamepick" id="game-pick"></div>
     <ul class="seats" id="seats"></ul>
     <p class="note" id="lobby-note"></p>
     <div class="actions" id="lobby-actions" style="justify-content:flex-start"></div>
@@ -238,6 +261,7 @@ button { cursor: pointer; }
 <div id="sheet" hidden>
   <div class="sheet-body" role="dialog" aria-labelledby="rules-h">
     <h2 id="rules-h">How to play</h2>
+    <div id="rules-25" class="rules">
     <p>Everyone gets five cards and the next card is turned up to set trumps. Each trick is worth 5. The first player to 25 wins at once, even mid hand.</p>
     <h3>Trumps, strongest first</h3>
     <div class="suits" id="suit-pick"></div>
@@ -257,6 +281,27 @@ button { cursor: pointer; }
       <li>If the turned card is an ace, the dealer may take it and throw away a card.</li>
       <li>If you hold the ace of trumps, you may take the turned card on your first turn, before you play.</li>
     </ul>
+    </div>
+    <div id="rules-31" class="rules" hidden>
+    <p>Everyone gets three cards and three lives. One card is turned face up to start the discards. The last player with a life wins.</p>
+    <h3>What a hand counts</h3>
+    <ul>
+      <li>Add up your cards in one suit only. An ace is 11, a king, queen or knave is 10, the rest are their number.</li>
+      <li>The best hand is 31. Three of a kind counts 30½.</li>
+    </ul>
+    <h3>Your turn</h3>
+    <ul>
+      <li>Take the top of the deck or the top discard, then throw one card away.</li>
+      <li>You cannot throw back a discard you have just picked up.</li>
+      <li>Or knock in place of drawing. Everyone else gets one more turn, then all hands are shown.</li>
+    </ul>
+    <h3>Losing lives</h3>
+    <ul>
+      <li>The lowest hand loses a life. If hands tie for lowest they all lose one, but a knocker who ties is safe.</li>
+      <li>Make 31 and the round stops at once. Everyone else loses a life.</li>
+      <li>Out of lives, out of the game.</li>
+    </ul>
+    </div>
     <button class="btn primary" data-act="close-rules">Back to the table</button>
   </div>
 </div>
@@ -476,9 +521,204 @@ button { cursor: pointer; }
   root.TwentyFive = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
+<script>/* Rules engine for Thirty-One (draw and discard, knock, three lives). Pure functions. */
+(function (root) {
+  'use strict';
+  var SUITS = ['H', 'D', 'C', 'S'];
+  var RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  var LIVES = 3;
+  function suitOf(c) { return c.slice(-1); }
+  function rankOf(c) { return c.slice(0, -1); }
+  function pip(c) { var r = rankOf(c); return r === 'A' ? 11 : (r === 'K' || r === 'Q' || r === 'J') ? 10 : +r; }
+
+  /* Best total in one suit. Three of a kind counts 30.5. */
+  function handValue(hand) {
+    var best = 0, bySuit = {};
+    hand.forEach(function (c) { bySuit[suitOf(c)] = (bySuit[suitOf(c)] || 0) + pip(c); });
+    for (var s in bySuit) if (bySuit[s] > best) best = bySuit[s];
+    if (hand.length === 3 && rankOf(hand[0]) === rankOf(hand[1]) && rankOf(hand[1]) === rankOf(hand[2]) && best < 30.5) best = 30.5;
+    return best;
+  }
+  function bestSuit(hand) {
+    var bySuit = {}, best = null;
+    hand.forEach(function (c) { bySuit[suitOf(c)] = (bySuit[suitOf(c)] || 0) + pip(c); });
+    for (var s in bySuit) if (best === null || bySuit[s] > bySuit[best]) best = s;
+    return best;
+  }
+  function shuffle(d, rng) {
+    for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var x = d[i]; d[i] = d[j]; d[j] = x; }
+    return d;
+  }
+  function alive(st, s) { return st.lives[s] > 0; }
+  function nextAlive(st, from) {
+    var n = st.players.length;
+    for (var k = 1; k <= n; k++) { var s = (from + k) % n; if (alive(st, s)) return s; }
+    return -1;
+  }
+
+  function endRound(st, reason) {
+    var n = st.players.length, scores = [], losers = [];
+    for (var s = 0; s < n; s++) scores.push(alive(st, s) ? handValue(st.hands['s' + s]) : -1);
+    if (reason === 'thirtyone') {
+      for (s = 0; s < n; s++) if (alive(st, s) && scores[s] !== 31) losers.push(s);
+    } else {
+      var low = Infinity;
+      for (s = 0; s < n; s++) if (alive(st, s) && scores[s] < low) low = scores[s];
+      for (s = 0; s < n; s++) if (alive(st, s) && scores[s] === low) losers.push(s);
+      /* A knocker who ties for lowest is safe. */
+      if (losers.length > 1 && losers.indexOf(st.knocker) !== -1) losers.splice(losers.indexOf(st.knocker), 1);
+    }
+    var aliveCount = 0, wouldDie = 0;
+    for (s = 0; s < n; s++) if (alive(st, s)) { aliveCount++; if (losers.indexOf(s) !== -1 && st.lives[s] === 1) wouldDie++; }
+    var replay = wouldDie === aliveCount; /* nobody would be left, so the round does not count */
+    if (!replay) losers.forEach(function (x) { st.lives[x] -= 1; });
+    st.result = { reason: reason, scores: scores, losers: losers, knocker: st.knocker, replay: replay };
+    st.turn = -1; st.step = 'draw';
+    var left = [];
+    for (s = 0; s < n; s++) if (alive(st, s)) left.push(s);
+    if (left.length === 1) { st.phase = 'over'; st.winner = left[0]; }
+    else st.phase = 'roundEnd';
+    return st;
+  }
+
+  function dealInto(st, rng) {
+    var n = st.players.length, deck = [];
+    SUITS.forEach(function (s) { RANKS.forEach(function (r) { deck.push(r + s); }); });
+    shuffle(deck, rng || Math.random);
+    st.hands = {};
+    for (var s = 0; s < n; s++) st.hands['s' + s] = alive(st, s) ? deck.splice(0, 3) : [];
+    st.pile = [deck.shift()];
+    st.stock = deck;
+    st.knocker = -1; st.result = null; st.lastMove = null; st.drawn = null;
+    st.roundNo = (st.roundNo || 0) + 1;
+    st.phase = 'play'; st.step = 'draw'; st.turn = nextAlive(st, st.dealer);
+    for (s = 0; s < n; s++) if (alive(st, s) && handValue(st.hands['s' + s]) === 31) return endRound(st, 'thirtyone');
+    return st;
+  }
+
+  function newGame(players, dealer, rng) {
+    if (players.length < 2 || players.length > 10) throw new Error('Thirty-One needs 2 to 10 players.');
+    var st = { game: '31', players: players, dealer: dealer || 0, roundNo: 0, seq: 0, winner: -1,
+      lives: players.map(function () { return LIVES; }) };
+    return dealInto(st, rng);
+  }
+
+  function apply(state, a, rng) {
+    var st = JSON.parse(JSON.stringify(state));
+    rng = rng || Math.random;
+    st.seq++;
+    if (a.type === 'deal') {
+      if (st.phase !== 'roundEnd') throw new Error('The round is not finished.');
+      st.dealer = nextAlive(st, st.dealer);
+      return dealInto(st, rng);
+    }
+    if (st.phase !== 'play' || st.turn !== a.seat) throw new Error('It is not your turn.');
+    var hand = st.hands['s' + a.seat];
+    if (a.type === 'knock') {
+      if (st.step !== 'draw') throw new Error('You can only knock before you draw.');
+      if (st.knocker !== -1) throw new Error('Someone has already knocked.');
+      st.knocker = a.seat; st.lastMove = { seat: a.seat, knock: true };
+      st.turn = nextAlive(st, a.seat);
+      return st;
+    }
+    if (a.type === 'draw') {
+      if (st.step !== 'draw') throw new Error('You have already drawn.');
+      var c;
+      if (a.from === 'pile') { c = st.pile.pop(); st.drawn = { from: 'pile', card: c }; }
+      else {
+        if (!st.stock.length) { var top = st.pile.pop(); st.stock = shuffle(st.pile, rng); st.pile = [top]; }
+        c = st.stock.shift(); st.drawn = { from: 'stock', card: c };
+      }
+      hand.push(c); st.step = 'discard';
+      return st;
+    }
+    if (a.type === 'discard') {
+      if (st.step !== 'discard') throw new Error('Draw a card first.');
+      var i = hand.indexOf(a.card);
+      if (i === -1) throw new Error('That card is not in your hand.');
+      if (st.drawn.from === 'pile' && st.drawn.card === a.card) throw new Error('You cannot throw back the card you just picked up.');
+      hand.splice(i, 1); st.pile.push(a.card);
+      st.lastMove = { seat: a.seat, from: st.drawn.from, took: st.drawn.from === 'pile' ? st.drawn.card : null, threw: a.card };
+      st.drawn = null; st.step = 'draw';
+      if (handValue(hand) === 31) return endRound(st, 'thirtyone');
+      var nx = nextAlive(st, a.seat);
+      if (nx === st.knocker) return endRound(st, 'knock');
+      st.turn = nx;
+      return st;
+    }
+    throw new Error('Unknown move.');
+  }
+
+  function waitingSeat(st) {
+    if (st.phase === 'roundEnd') return nextAlive(st, st.dealer);
+    return st.turn;
+  }
+
+  function botMove(st, seat) {
+    if (st.phase === 'roundEnd') return { type: 'deal' };
+    var hand = st.hands['s' + seat];
+    if (st.step === 'draw') {
+      var v = handValue(hand);
+      var aliveN = st.lives.filter(function (l) { return l > 0; }).length;
+      if (st.knocker === -1 && v >= (aliveN > 4 ? 27 : 25)) return { type: 'knock', seat: seat };
+      var top = st.pile[st.pile.length - 1], best = v;
+      hand.forEach(function (c, i) {
+        var h = hand.slice(); h[i] = top;
+        if (handValue(h) > best) best = handValue(h);
+      });
+      return { type: 'draw', seat: seat, from: best > v ? 'pile' : 'stock' };
+    }
+    var pick = null, pv = -1;
+    hand.forEach(function (c) {
+      if (st.drawn && st.drawn.from === 'pile' && st.drawn.card === c) return;
+      var rest = hand.filter(function (x) { return x !== c; }), val = handValue(rest);
+      if (val > pv || (val === pv && pip(c) < pip(pick))) { pv = val; pick = c; }
+    });
+    return { type: 'discard', seat: seat, card: pick };
+  }
+
+  /* What one player is allowed to see. */
+  function redact(st, seat) {
+    var G = JSON.parse(JSON.stringify(st));
+    var open = G.phase !== 'play';
+    G.stockCount = G.stock.length; G.stock = [];
+    G.pile = G.pile.slice(-1);
+    G.players.forEach(function (p, s) { if (s !== seat && !open) G.hands['s' + s] = []; });
+    if (G.drawn && G.turn !== seat && G.drawn.from === 'stock') G.drawn.card = null;
+    return G;
+  }
+
+  function sortHand(hand) {
+    var order = { H: 0, S: 1, D: 2, C: 3 };
+    return hand.slice().sort(function (a, b) {
+      return suitOf(a) !== suitOf(b) ? order[suitOf(a)] - order[suitOf(b)] : pip(b) - pip(a);
+    });
+  }
+
+  var api = { LIVES: LIVES, suitOf: suitOf, rankOf: rankOf, pip: pip, handValue: handValue, bestSuit: bestSuit,
+    newGame: newGame, apply: apply, botMove: botMove, waitingSeat: waitingSeat, redact: redact, sortHand: sortHand };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.ThirtyOne = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
 <script>(function () {
   'use strict';
-  var E = window.TwentyFive;
+  var E = window.TwentyFive, T = window.ThirtyOne;
+  var GAME_NAME = { '25': 'Twenty-Five', '31': 'Thirty-One' };
+  var ENG = {
+    '25': {
+      newGame: E.newGame, apply: E.apply, botMove: E.botMove,
+      waitingSeat: function (G) { return G.phase === 'handEnd' ? (G.dealer + 1) % G.players.length : G.turn; },
+      redact: function (st, seat) {
+        var G = JSON.parse(JSON.stringify(st));
+        G.players.forEach(function (p, s) { if (s !== seat) G.hands['s' + s] = []; });
+        return G;
+      }
+    },
+    '31': T
+  };
+  function gameOf(G) { return G && G.game === '31' ? '31' : '25'; }
+  function eng(G) { return ENG[gameOf(G)]; }
   var $ = function (id) { return document.getElementById(id); };
   var SYM = { H: '♥︎', D: '♦︎', C: '♣︎', S: '♠︎' };
   var COUNTIES = ['kerry', 'mayo', 'sligo', 'cork', 'clare', 'galway', 'donegal', 'meath', 'louth', 'cavan', 'tyrone', 'antrim', 'down', 'derry', 'armagh', 'leitrim', 'laois', 'offaly', 'carlow', 'wexford', 'wicklow', 'kildare', 'dublin', 'limerick', 'tipperary', 'waterford', 'kilkenny', 'longford', 'monaghan', 'fermanagh', 'roscommon', 'westmeath'];
@@ -500,7 +740,7 @@ button { cursor: pointer; }
     botKey: null, rulesSuit: 'H', linkUp: false, leaveArmed: 0
   };
   store.set('pid', app.pid);
-  var net = { peer: null, conns: [], hostConn: null, seats: [], retry: null, opening: null };
+  var net = { peer: null, conns: [], hostConn: null, seats: [], retry: null, opening: null, game: '25' };
 
   function peerOptions() {
     var q = new URLSearchParams(location.search);
@@ -541,21 +781,20 @@ button { cursor: pointer; }
   /* ---------- Host ---------- */
   function connOpen(pid) { return net.conns.some(function (c) { return c.pid === pid && c.open; }); }
   function lobbyView() {
-    return { code: app.code, hostName: app.name, seats: net.seats.map(function (s) {
+    return { code: app.code, hostName: app.name, game: net.game, seats: net.seats.map(function (s) {
       return { name: s.name, bot: !!s.bot, host: s.pid === app.pid, away: !s.bot && s.pid !== app.pid && !connOpen(s.pid) };
     }) };
   }
   function viewFor(pid) {
     if (!app.Gfull) return null;
-    var G = JSON.parse(JSON.stringify(app.Gfull));
-    G.players.forEach(function (p, s) {
-      p.away = !p.bot && p.id !== app.pid && !connOpen(p.id);
-      if (p.id !== pid) G.hands['s' + s] = [];
-    });
+    var seat = -1;
+    app.Gfull.players.forEach(function (p, s) { if (p.id === pid) seat = s; });
+    var G = eng(app.Gfull).redact(app.Gfull, seat);
+    G.players.forEach(function (p) { p.away = !p.bot && p.id !== app.pid && !connOpen(p.id); });
     return G;
   }
   function broadcast() {
-    store.set('host.' + app.code, JSON.stringify({ name: app.name, seats: net.seats, G: app.Gfull || null }));
+    store.set('host.' + app.code, JSON.stringify({ name: app.name, seats: net.seats, game: net.game, G: app.Gfull || null }));
     var lobby = lobbyView();
     net.conns.forEach(function (c) {
       if (c.open) { try { c.send({ t: 'state', lobby: lobby, G: viewFor(c.pid) }); } catch (e) {} }
@@ -565,7 +804,7 @@ button { cursor: pointer; }
   function hostOpen(code, saved) {
     app.kind = 'host'; app.code = code; app.Gfull = saved ? saved.G : null;
     net.seats = saved ? saved.seats : [{ pid: app.pid, name: app.name, bot: false }];
-    net.conns = [];
+    net.conns = []; net.game = saved && saved.game ? saved.game : net.game;
     if (location.hash.slice(1) !== code) location.hash = code;
     show('lobby'); $('lobby-code').textContent = pretty(code); setConn('Opening the table…');
     var peer = net.peer = new Peer(PREFIX + code, peerOptions());
@@ -614,15 +853,15 @@ button { cursor: pointer; }
       var G2 = app.Gfull, s = -1;
       G2.players.forEach(function (x, i) { if (x.id === conn.pid) s = i; });
       if (s < 0) return;
-      var a = { type: d.a.type, seat: s, card: d.a.card, discard: d.a.discard };
-      if (a.type === 'deal' && s !== (G2.dealer + 1) % G2.players.length) return;
-      if (['rob', 'pass', 'play', 'deal'].indexOf(a.type) === -1) return;
+      var a = { type: d.a.type, seat: s, card: d.a.card, discard: d.a.discard, from: d.a.from };
+      if (a.type === 'deal' && s !== eng(G2).waitingSeat(G2)) return;
+      if (['rob', 'pass', 'play', 'deal', 'draw', 'discard', 'knock'].indexOf(a.type) === -1) return;
       hostApply(a, true);
     }
   }
   function hostApply(a, quiet) {
     var next;
-    try { next = E.apply(app.Gfull, a); } catch (e) { if (!quiet) toast(e.message); broadcast(); return; }
+    try { next = eng(app.Gfull).apply(app.Gfull, a); } catch (e) { if (!quiet) toast(e.message); broadcast(); return; }
     next.gameNo = app.Gfull.gameNo || 1;
     app.Gfull = next; broadcast(); driveBots();
   }
@@ -695,6 +934,10 @@ button { cursor: pointer; }
       ? '<button class="btn primary" data-act="start"' + (n < 2 ? ' disabled' : '') + '>Deal the first hand</button>' +
         '<button class="btn" data-act="add-bot"' + (n >= 10 ? ' disabled' : '') + '>Add a computer player</button>'
       : '';
+    var game = host ? net.game : (L ? L.game : '25');
+    $('game-pick').innerHTML = host ? ['25', '31'].map(function (g) {
+      return '<button data-act="pick-game" data-game="' + g + '" aria-pressed="' + (g === game) + '">' + GAME_NAME[g] + '</button>';
+    }).join('') : (L ? '<p class="note">Tonight\'s game is <b>' + GAME_NAME[game] + '</b>.</p>' : '');
     $('invite').hidden = !host;
     if (host) $('invite-link').textContent = inviteLink();
   }
@@ -728,7 +971,7 @@ button { cursor: pointer; }
     var players = [{ id: app.pid, name: name, bot: false }];
     for (var i = 0; i < n; i++) players.push({ id: 'bot' + i, name: BOT_NAMES[i], bot: true });
     app.kind = 'practice'; app.lobby = null;
-    app.G = E.newGame(players, Math.floor(Math.random() * players.length)); app.G.gameNo = 1;
+    app.G = ENG[$('pgame').value].newGame(players, Math.floor(Math.random() * players.length)); app.G.gameNo = 1;
     show('game'); renderGame(); driveBots();
   }
 
@@ -740,44 +983,55 @@ button { cursor: pointer; }
     if (app.kind === 'guest') {
       if (!app.linkUp) { toast('Not connected to the table just now.'); return; }
       if (app.busy) return;
-      try { E.apply(app.G, a); } catch (e) { if (a.type !== 'deal') { toast(e.message); return; } }
+      if (gameOf(app.G) === '25' && a.type !== 'deal') { try { E.apply(app.G, a); } catch (e) { toast(e.message); return; } }
       app.busy = true; setTimeout(function () { app.busy = false; }, 4000);
       net.hostConn.send({ t: 'act', a: a });
       return;
     }
     if (app.kind === 'host') { hostApply(a); return; }
     var next;
-    try { next = E.apply(app.G, a); } catch (e) { toast(e.message); return; }
+    try { next = eng(app.G).apply(app.G, a); } catch (e) { toast(e.message); return; }
     next.gameNo = app.G.gameNo || 1;
     app.G = next; app.selected = null; app.robbing = false; renderGame(); driveBots();
   }
-  function playAgain() {
+  function playAgain(game) {
     var G = full(); if (!G || !isHost()) return;
-    var st = E.newGame(G.players.map(function (p) { return { id: p.id, name: p.name, bot: !!p.bot }; }), (G.dealer + 1) % G.players.length);
+    game = game || gameOf(G); if (app.kind === 'host') net.game = game;
+    var st = ENG[game].newGame(G.players.map(function (p) { return { id: p.id, name: p.name, bot: !!p.bot }; }), (G.dealer + 1) % G.players.length);
     st.gameNo = (G.gameNo || 1) + 1;
     if (app.kind === 'host') { app.Gfull = st; broadcast(); } else { app.G = st; renderGame(); }
     driveBots();
   }
   function stateKey(G) { return (G.gameNo || 1) + ':' + G.seq; }
-  function waitingSeat(G) {
-    if (G.phase === 'handEnd') return (G.dealer + 1) % G.players.length;
-    return G.turn;
-  }
+  function waitingSeat(G) { return eng(G).waitingSeat(G); }
   function driveBots() {
-    var G = full(); if (!G || !isHost()) return;
+    var G = full(); if (!G || !isHost() || G.phase === 'over') return;
     var seat = waitingSeat(G);
     if (seat < 0 || !G.players[seat].bot) return;
     var key = stateKey(G); if (app.botKey === key) return; app.botKey = key;
-    var wait = G.phase === 'handEnd' ? 3000 : (!G.trick.length && G.lastTrick ? 2200 : 1000);
+    var wait = G.phase === 'handEnd' ? 3000 : G.phase === 'roundEnd' ? 4500
+      : gameOf(G) === '31' ? (G.step === 'discard' ? 900 : 1300) : (!G.trick.length && G.lastTrick ? 2200 : 1000);
     setTimeout(function () {
       var now = full(); if (!now || stateKey(now) !== key) return;
-      act(E.botMove(now, seat));
+      act(eng(now).botMove(now, seat));
     }, wait);
   }
   function cover() {
     var G = full(); if (app.kind !== 'host' || !G) return;
     var seat = waitingSeat(G); if (seat < 0) return;
-    hostApply(E.botMove(G, seat));
+    hostApply(eng(G).botMove(G, seat));
+    G = full();
+    if (gameOf(G) === '31' && G.phase === 'play' && G.turn === seat && G.step === 'discard') hostApply(T.botMove(G, seat));
+  }
+  function againButtons(G) {
+    var other = gameOf(G) === '25' ? '31' : '25';
+    return '<button class="btn primary" data-act="again">Play again</button><button class="btn" data-act="again" data-game="' + other + '">Switch to ' + GAME_NAME[other] + '</button>';
+  }
+  function coverButton(G, me) {
+    var ws = waitingSeat(G);
+    if (app.kind === 'host' && G.phase !== 'over' && ws >= 0 && ws !== me && G.players[ws].away)
+      return '<button class="btn small" data-act="cover">' + (G.phase === 'play' ? 'Play for ' : 'Deal for ') + esc(G.players[ws].name) + '</button>';
+    return '';
   }
 
   /* ---------- Game view ---------- */
@@ -788,6 +1042,7 @@ button { cursor: pointer; }
   }
   function renderGame() {
     var G = app.G; if (!G) return;
+    if (gameOf(G) === '31') { render31(G); return; }
     var n = G.players.length, me = mySeat(), t = G.trump;
     var nm = function (s) { return s === me ? 'You' : esc(G.players[s].name); };
     var hostName = app.lobby ? esc(app.lobby.hostName) : 'the host';
@@ -819,7 +1074,7 @@ button { cursor: pointer; }
 
     if (G.phase === 'over') {
       status = (G.winner === me ? 'You win' : nm(G.winner) + ' wins') + ' the game with 25.';
-      if (isHost()) actions = '<button class="btn primary" data-act="again">Play again</button>';
+      if (isHost()) actions = againButtons(G);
       else sub = 'Waiting for ' + hostName + ' to start another game.';
     } else if (G.phase === 'handEnd') {
       var nd = (G.dealer + 1) % n;
@@ -857,9 +1112,7 @@ button { cursor: pointer; }
       status = took + 'Waiting for ' + nm(G.turn) + '.';
       if (live && G.lastTrick) sub = 'Last trick went to ' + nm(G.lastTrick.winner) + '.';
     }
-    var ws = waitingSeat(G);
-    if (app.kind === 'host' && G.phase !== 'over' && ws >= 0 && ws !== me && G.players[ws].away)
-      actions += '<button class="btn small" data-act="cover">' + (G.phase === 'handEnd' ? 'Deal for ' : 'Play for ') + esc(G.players[ws].name) + '</button>';
+    actions += coverButton(G, me);
     $('status').innerHTML = status; $('sub').innerHTML = sub; $('sub').hidden = !sub; $('actions').innerHTML = actions;
 
     var h = $('hand');
@@ -873,8 +1126,102 @@ button { cursor: pointer; }
     }).join('') : '<p class="note">No cards left in your hand.</p>';
   }
 
+  /* ---------- Thirty-One view ---------- */
+  function render31(G) {
+    var n = G.players.length, me = mySeat();
+    var nm = function (s) { return s === me ? 'You' : esc(G.players[s].name); };
+    var hostName = app.lobby ? esc(app.lobby.hostName) : 'the host';
+    var playing = G.phase === 'play', myTurn = playing && G.turn === me;
+
+    $('trumpbox').innerHTML = '<span><b>Thirty-One</b><small>' +
+      (playing && G.knocker !== -1 ? nm(G.knocker) + ' knocked. One last turn each.' : 'Round ' + G.roundNo) + '</small></span>';
+
+    $('players').innerHTML = G.players.map(function (p, s) {
+      var pips = '';
+      for (var i = 0; i < T.LIVES; i++) pips += '<i class="' + (G.lives[s] > i ? 'on' : '') + '"></i>';
+      return '<div class="chip' + (G.turn === s ? ' turn' : '') + (p.away || !G.lives[s] ? ' away' : '') + '"><div class="nm"><span>' + esc(p.name) + '</span>' +
+        (s === me ? '<b class="tag me">you</b>' : '') + (p.away ? '<b class="tag me">away</b>' : '') +
+        (playing && s === G.knocker ? '<b class="tag" title="Knocked">K</b>' : '') + (s === G.dealer ? '<b class="tag" title="Dealer">D</b>' : '') +
+        '</div><div class="pips" aria-label="' + G.lives[s] + ' lives">' + pips + '<em>' + (G.lives[s] ? '' : 'out') + '</em></div></div>';
+    }).join('');
+
+    var status = '', sub = '', actions = '', mid = '';
+    var hand = me >= 0 ? G.hands['s' + me] : [];
+    if (playing) {
+      var top = G.pile[G.pile.length - 1], canDraw = myTurn && G.step === 'draw';
+      var count = G.stockCount != null ? G.stockCount : G.stock.length;
+      mid = '<div class="play pile"><button class="pilebtn" data-act="draw-stock"' + (canDraw ? '' : ' disabled') + ' aria-label="Take from the deck"><span class="card back"></span></button><span>Deck, ' + count + ' left</span></div>' +
+        '<div class="play pile"><button class="pilebtn" data-act="draw-pile"' + (canDraw && top ? '' : ' disabled') + ' aria-label="Take the top discard">' + (top ? cardHTML(top) : '<span class="card empty"></span>') + '</button><span>Discards</span></div>';
+      var lm = G.lastMove, last = '';
+      if (lm) last = lm.knock ? nm(lm.seat) + ' knocked.' : nm(lm.seat) + (lm.took ? ' took the ' + cardText(lm.took) + ' and' : ' drew from the deck and') + ' threw the ' + cardText(lm.threw) + '.';
+      if (canDraw) {
+        status = 'Your turn. Take the top of the deck or the top discard' + (G.knocker === -1 ? ', or knock.' : '. This is your last turn.');
+        sub = last;
+        if (G.knocker === -1) actions = '<button class="btn" data-act="knock">Knock</button>';
+      } else if (myTurn) {
+        status = 'Now throw one card away.';
+        sub = app.selected ? 'Tap the card again to throw it.' : G.drawn && G.drawn.from === 'pile' ? 'You cannot throw back the ' + cardText(G.drawn.card) + '.' : G.drawn && G.drawn.card ? 'You drew the ' + cardText(G.drawn.card) + '.' : '';
+      } else { status = 'Waiting for ' + nm(G.turn) + '.'; sub = last; }
+    } else {
+      var r = G.result, order = [];
+      for (var s = 0; s < n; s++) if (r.scores[s] >= 0) order.push(s);
+      order.sort(function (a, b) { return r.scores[b] - r.scores[a]; });
+      mid = '<div class="showdown">' + order.map(function (s) {
+        var lost = r.losers.indexOf(s) !== -1;
+        return '<div class="show' + (lost ? ' lost' : '') + '"><span class="who">' + nm(s) + (lost ? '<small>loses a life</small>' : '') + '</span><span class="cards">' +
+          T.sortHand(G.hands['s' + s]).map(function (c) { return cardHTML(c); }).join('') + '</span><b>' + String(r.scores[s]).replace('.5', '\u00BD') + '</b></div>';
+      }).join('') + '</div>';
+      var summary;
+      if (r.reason === 'thirtyone') {
+        var hit = order.filter(function (s) { return r.scores[s] === 31; }).map(nm);
+        summary = hit.join(' and ') + ' hit 31. Everyone else loses a life.';
+      } else {
+        var verb = r.losers.length > 1 || r.losers[0] === me ? ' lose' : ' loses';
+        summary = nm(r.knocker) + ' knocked. ' + r.losers.map(nm).join(' and ') + verb + ' a life.';
+      }
+      if (G.phase === 'over') {
+        status = (G.winner === me ? 'You win' : nm(G.winner) + ' wins') + ' the game, the last one with a life.';
+        sub = summary;
+        if (isHost()) actions = againButtons(G); else sub += ' Waiting for ' + hostName + ' to start another game.';
+      } else {
+        var nd = T.waitingSeat(G);
+        status = summary;
+        if (nd === me) actions = '<button class="btn primary" data-act="deal">Deal the next round</button>';
+        else sub = nm(nd) + ' deals next.';
+      }
+    }
+    actions += coverButton(G, me);
+    $('trick').innerHTML = mid;
+    $('status').innerHTML = status; $('sub').innerHTML = sub; $('sub').hidden = !sub; $('actions').innerHTML = actions;
+
+    var h = $('hand');
+    if (me < 0 || !G.lives[me]) {
+      h.style.gridTemplateColumns = '1fr';
+      h.innerHTML = '<p class="note">' + (me < 0 ? 'You are watching this table.' : 'You are out of lives. Stay and watch the rest.') + '</p>';
+      return;
+    }
+    var sorted = T.sortHand(hand);
+    h.style.gridTemplateColumns = 'repeat(' + Math.max(sorted.length, 1) + ', minmax(0, 78px))';
+    var throwing = myTurn && G.step === 'discard';
+    var worth = hand.length === 3 ? '<p class="note">Your hand counts <b>' + String(T.handValue(hand)).replace('.5', '\u00BD') + '</b></p>' : '';
+    h.innerHTML = worth + sorted.map(function (c) {
+      var stuck = throwing && G.drawn && G.drawn.from === 'pile' && G.drawn.card === c;
+      return cardHTML(c, (stuck ? 'dim' : '') + (app.selected === c ? ' sel' : ''), 'button');
+    }).join('');
+  }
+  function tap31(c) {
+    var G = app.G, me = mySeat();
+    var myTurn = G.phase === 'play' && G.turn === me;
+    if (!myTurn) { toast(G.phase === 'play' ? 'Hold on, it is not your turn.' : 'The round is over.'); return; }
+    if (G.step !== 'discard') { toast('Take a card first, or knock.'); return; }
+    if (G.drawn && G.drawn.from === 'pile' && G.drawn.card === c) { toast('You cannot throw back the card you just picked up.'); return; }
+    if (app.selected === c) act({ type: 'discard', seat: me, card: c });
+    else { app.selected = c; renderGame(); }
+  }
+
   function tapCard(c) {
     var G = app.G, me = mySeat(); if (!G || me < 0) return;
+    if (gameOf(G) === '31') { tap31(c); return; }
     if (app.robbing) { act({ type: 'rob', seat: me, discard: c }); return; }
     if (G.phase !== 'play' || G.turn !== me) { toast(G.phase === 'play' ? 'Hold on, it is not your turn.' : 'No card to play just now.'); return; }
     if (E.legalCards(G.hands['s' + me], G.trick, G.trump).indexOf(c) === -1) {
@@ -886,6 +1233,8 @@ button { cursor: pointer; }
 
   /* ---------- Rules sheet ---------- */
   function renderRules() {
+    var g = app.G ? gameOf(app.G) : app.kind === 'host' || app.kind === 'guest' ? ((app.lobby && app.lobby.game) || net.game) : $('pgame').value;
+    $('rules-25').hidden = g !== '25'; $('rules-31').hidden = g !== '31';
     var t = app.rulesSuit;
     $('suit-pick').innerHTML = E.SUITS.map(function (s) {
       return '<button data-act="suit" data-suit="' + s + '" aria-pressed="' + (s === t) + '" aria-label="' + E.SUIT_NAME[s] + '" style="color:' +
@@ -910,7 +1259,7 @@ button { cursor: pointer; }
     else if (a === 'leave') leave();
     else if (a === 'start') {
       if (net.seats.length < 2) return;
-      app.Gfull = E.newGame(net.seats.map(function (s) { return { id: s.pid, name: s.name, bot: !!s.bot }; }), Math.floor(Math.random() * net.seats.length));
+      app.Gfull = ENG[net.game].newGame(net.seats.map(function (s) { return { id: s.pid, name: s.name, bot: !!s.bot }; }), Math.floor(Math.random() * net.seats.length));
       app.Gfull.gameNo = 1; broadcast(); driveBots();
     }
     else if (a === 'add-bot') {
@@ -934,7 +1283,11 @@ button { cursor: pointer; }
     else if (a === 'rob-cancel') { app.robbing = false; renderGame(); }
     else if (a === 'pass') act({ type: 'pass', seat: me });
     else if (a === 'deal') act({ type: 'deal' });
-    else if (a === 'again') playAgain();
+    else if (a === 'again') playAgain(el.getAttribute('data-game'));
+    else if (a === 'pick-game') { net.game = el.getAttribute('data-game'); broadcast(); }
+    else if (a === 'draw-stock') act({ type: 'draw', seat: me, from: 'stock' });
+    else if (a === 'draw-pile') act({ type: 'draw', seat: me, from: 'pile' });
+    else if (a === 'knock') act({ type: 'knock', seat: me });
     else if (a === 'cover') cover();
   });
   document.addEventListener('visibilitychange', function () {
