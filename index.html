@@ -209,6 +209,9 @@ button { cursor: pointer; }
       <label class="field" for="pgame">Game
         <select id="pgame"><option value="25">Twenty-Five</option><option value="31">Thirty-One</option><option value="sw">Switch</option></select>
       </label>
+      <label class="field" for="speed">Computer speed
+        <select id="speed"><option value="slow">Slow</option><option value="medium">Medium</option><option value="fast">Fast</option></select>
+      </label>
       <label class="field" for="bots">Computer players
         <select id="bots">
           <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
@@ -1175,7 +1178,7 @@ button { cursor: pointer; }
     setTimeout(function () {
       var now = full(); if (!now || stateKey(now) !== key) return;
       act(eng(now).botMove(now, seat));
-    }, wait);
+    }, wait * ({ slow: 2.2, medium: 1.5, fast: 1 }[$('speed').value] || 2.2));
   }
   function cover() {
     var G = full(); if (app.kind !== 'host' || !G) return;
@@ -1546,6 +1549,8 @@ button { cursor: pointer; }
   $('fan').innerHTML = cardHTML('5H') + cardHTML('JH') + cardHTML('AH');
   $('name').value = app.name = store.get('name') || '';
   $('share-btn').hidden = !navigator.share;
+  $('speed').value = store.get('speed') || 'slow';
+  $('speed').addEventListener('change', function () { store.set('speed', $('speed').value); });
   renderRules(); renderHome();
   var code = location.hash.slice(1);
   if (code && !/^[a-z0-9-]{3,24}$/.test(code)) { history.replaceState(null, '', location.pathname + location.search); renderHome(); code = ''; }
