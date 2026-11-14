@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>25 and 31 Family Table</title>
+<title>Family Card Table</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
@@ -69,7 +69,7 @@ button { cursor: pointer; }
 .mast { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: end; }
 .mast .for { grid-column: 1 / -1; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
 .mast h1 .amp { color: var(--brass); }
-.mast h1 { font-size: clamp(48px, 16vw, 76px); line-height: .95; white-space: nowrap; }
+.mast h1 { font-size: clamp(34px, 10.5vw, 60px); line-height: .95; white-space: nowrap; }
 .mast .lede { grid-column: 1 / -1; color: var(--chalk-dim); max-width: 46ch; }
 .fan { display: flex; padding: 6px 10px 0 0; }
 .fan .card { --w: 46px; margin-left: -16px; transform-origin: 50% 120%; }
@@ -174,6 +174,11 @@ button { cursor: pointer; }
 .show b { font-family: var(--display); font-weight: 400; font-size: 20px; text-align: right; font-variant-numeric: tabular-nums; }
 .show.lost { outline: 1px solid #ff9d94; }
 .felt { justify-content: safe center; }
+.hand { max-height: 46vh; overflow-y: auto; }
+.pips em.count { margin-left: 0; font-size: 12px; }
+.pips em.count.last { color: var(--brass); font-weight: 700; }
+.suitbtn { font-size: 24px; min-width: 56px; }
+.gamepick button { font-size: 14px; padding: 0 4px; }
 #toast { position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%); background: var(--chalk); color: var(--baize-deep); font-weight: 600; font-size: 14px;
   padding: 10px 14px; border-radius: 10px; max-width: calc(100% - 32px); text-align: center; z-index: 6; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
@@ -183,10 +188,10 @@ button { cursor: pointer; }
 
 <main id="home" class="page">
   <header class="mast">
-    <p class="for">Two Irish card games for two to ten players</p>
-    <h1>25 <span class="amp">&amp;</span> 31</h1>
+    <p class="for">Three card games for two to ten players</p>
+    <h1>The Card Table</h1>
     <div class="fan" aria-label="The five, knave and ace of hearts" id="fan"></div>
-    <p class="lede">Twenty-Five for tricks and trumps, Thirty-One for knocking and nerve. Open a table, send the link, and deal the family in.</p>
+    <p class="lede">Twenty-Five, Thirty-One and Switch, played by the house rules. Open a table, send the link, and deal the family in.</p>
   </header>
 
   <section class="panel" aria-labelledby="family-h">
@@ -202,7 +207,7 @@ button { cursor: pointer; }
     <h2 id="practice-h">Practise against the computer</h2>
     <div class="row">
       <label class="field" for="pgame">Game
-        <select id="pgame"><option value="25">Twenty-Five</option><option value="31">Thirty-One</option></select>
+        <select id="pgame"><option value="25">Twenty-Five</option><option value="31">Thirty-One</option><option value="sw">Switch</option></select>
       </label>
       <label class="field" for="bots">Computer players
         <select id="bots">
@@ -300,6 +305,27 @@ button { cursor: pointer; }
       <li>The lowest hand loses a life. If hands tie for lowest they all lose one, but a knocker who ties is safe.</li>
       <li>Make 31 and the round stops at once. Everyone else loses a life.</li>
       <li>Out of lives, out of the game.</li>
+    </ul>
+    </div>
+    <div id="rules-sw" class="rules" hidden>
+    <p>Be the first to get rid of all your cards. With up to four players everyone gets seven cards, with five to seven it is five, and with eight or more it is four.</p>
+    <h3>Your turn</h3>
+    <ul>
+      <li>Play a card that matches the suit or the number of the top card.</li>
+      <li>If you cannot play, or would rather not, tap the deck to pick up one card. Your turn then ends.</li>
+    </ul>
+    <h3>Trick cards</h3>
+    <ul>
+      <li><b>8</b> skips the next person.</li>
+      <li><b>Jack</b> changes direction.</li>
+      <li><b>2</b> makes the next person pick up two. They can play another 2 to pass it on, and it builds by two each time.</li>
+      <li><b>Ace</b> goes on anything and lets you change the suit.</li>
+      <li><b>5 of diamonds</b> makes the next person pick up five.</li>
+      <li><b>King of diamonds</b> stops the 5 of diamonds.</li>
+    </ul>
+    <h3>Finishing</h3>
+    <ul>
+      <li>You cannot finish on a trick card: an 8, a jack, a 2, an ace or the 5 of diamonds. If that is your last card, you must pick up.</li>
     </ul>
     </div>
     <button class="btn primary" data-act="close-rules">Back to the table</button>
@@ -701,10 +727,144 @@ button { cursor: pointer; }
   root.ThirtyOne = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
+<script>/* Rules engine for Switch, family rules:
+   8 skips, jack reverses, 2 = pick up two (builds with another 2), ace changes suit,
+   5 of diamonds = pick up five, king of diamonds stops it, no finishing on a trick card. */
+(function (root) {
+  'use strict';
+  var SUITS = ['H', 'D', 'C', 'S'];
+  var RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  function suitOf(c) { return c.slice(-1); }
+  function rankOf(c) { return c.slice(0, -1); }
+  function isTrick(c) { var r = rankOf(c); return r === 'A' || r === '2' || r === '8' || r === 'J' || c === '5D'; }
+  function shuffle(d, rng) {
+    for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var x = d[i]; d[i] = d[j]; d[j] = x; }
+    return d;
+  }
+  function handSize(n) { return n <= 4 ? 7 : n <= 7 ? 5 : 4; }
+
+  function newGame(players, dealer, rng) {
+    var n = players.length;
+    if (n < 2 || n > 10) throw new Error('Switch needs 2 to 10 players.');
+    rng = rng || Math.random;
+    var deck = [];
+    SUITS.forEach(function (s) { RANKS.forEach(function (r) { deck.push(r + s); }); });
+    shuffle(deck, rng);
+    var st = { game: 'sw', players: players, dealer: dealer || 0, seq: 0, winner: -1, hands: {},
+      dir: 1, pending: 0, pendingType: '', phase: 'play', lastMove: null };
+    for (var s = 0; s < n; s++) st.hands['s' + s] = deck.splice(0, handSize(n));
+    st.pile = [deck.shift()];
+    st.suit = suitOf(st.pile[0]);
+    st.stock = deck;
+    st.turn = (st.dealer + 1) % n;
+    return st;
+  }
+
+  function legalCards(st, seat) {
+    var hand = st.hands['s' + seat], top = st.pile[st.pile.length - 1];
+    return hand.filter(function (c) {
+      if (hand.length === 1 && isTrick(c)) return false;
+      if (st.pending > 0) return st.pendingType === '2' ? rankOf(c) === '2' : c === 'KD';
+      return rankOf(c) === 'A' || suitOf(c) === st.suit || rankOf(c) === rankOf(top);
+    });
+  }
+
+  function drawCards(st, hand, k, rng) {
+    var got = 0;
+    for (var i = 0; i < k; i++) {
+      if (!st.stock.length) {
+        if (st.pile.length < 2) break;
+        var top = st.pile.pop(); st.stock = shuffle(st.pile, rng); st.pile = [top];
+      }
+      hand.push(st.stock.shift()); got++;
+    }
+    return got;
+  }
+
+  function apply(state, a, rng) {
+    var st = JSON.parse(JSON.stringify(state));
+    rng = rng || Math.random;
+    var n = st.players.length;
+    st.seq++;
+    if (st.phase !== 'play' || st.turn !== a.seat) throw new Error('It is not your turn.');
+    var hand = st.hands['s' + a.seat];
+    var step = function (k) { return (((a.seat + st.dir * k) % n) + n) % n; };
+    if (a.type === 'draw') {
+      var want = st.pending > 0 ? st.pending : 1;
+      var got = drawCards(st, hand, want, rng);
+      st.lastMove = { seat: a.seat, drew: got, penalty: st.pending > 0 };
+      st.pending = 0; st.pendingType = '';
+      st.turn = step(1);
+      return st;
+    }
+    if (a.type === 'play') {
+      var c = a.card, r = rankOf(c);
+      if (hand.indexOf(c) === -1) throw new Error('That card is not in your hand.');
+      if (hand.length === 1 && isTrick(c)) throw new Error('You cannot finish on a trick card.');
+      if (legalCards(st, a.seat).indexOf(c) === -1) throw new Error('You cannot play that card.');
+      if (r === 'A' && SUITS.indexOf(a.suit) === -1) throw new Error('Choose a suit for the ace.');
+      hand.splice(hand.indexOf(c), 1);
+      st.pile.push(c);
+      st.suit = r === 'A' ? a.suit : suitOf(c);
+      st.lastMove = { seat: a.seat, card: c, suit: r === 'A' ? a.suit : '', skipped: -1 };
+      if (r === '2') { st.pending += 2; st.pendingType = '2'; }
+      else if (c === '5D') { st.pending = 5; st.pendingType = '5D'; }
+      else if (c === 'KD' && st.pendingType === '5D') { st.pending = 0; st.pendingType = ''; st.lastMove.stopped = true; }
+      if (!hand.length) { st.phase = 'over'; st.winner = a.seat; st.turn = -1; return st; }
+      if (r === 'J') st.dir = -st.dir;
+      if (r === '8') { st.lastMove.skipped = step(1); st.turn = step(2); }
+      else st.turn = step(1);
+      return st;
+    }
+    throw new Error('Unknown move.');
+  }
+
+  function waitingSeat(st) { return st.turn; }
+
+  function botMove(st, seat) {
+    var hand = st.hands['s' + seat], legal = legalCards(st, seat);
+    if (!legal.length) return { type: 'draw', seat: seat };
+    var count = {};
+    hand.forEach(function (c) { if (rankOf(c) !== 'A') count[suitOf(c)] = (count[suitOf(c)] || 0) + 1; });
+    var plain = legal.filter(function (c) { return rankOf(c) !== 'A'; });
+    var pool = plain.length ? plain : legal;
+    pool.sort(function (x, y) { return (count[suitOf(y)] || 0) - (count[suitOf(x)] || 0) || (isTrick(y) ? 1 : 0) - (isTrick(x) ? 1 : 0); });
+    var card = pool[0], move = { type: 'play', seat: seat, card: card };
+    if (rankOf(card) === 'A') {
+      var best = suitOf(card);
+      SUITS.forEach(function (s) { if ((count[s] || 0) > (count[best] || 0)) best = s; });
+      move.suit = best;
+    }
+    return move;
+  }
+
+  function redact(st, seat) {
+    var G = JSON.parse(JSON.stringify(st));
+    G.counts = G.players.map(function (p, s) { return G.hands['s' + s].length; });
+    G.stockCount = G.stock.length + Math.max(0, G.pile.length - 1);
+    G.stock = []; G.pile = G.pile.slice(-1);
+    G.players.forEach(function (p, s) { if (s !== seat) G.hands['s' + s] = []; });
+    return G;
+  }
+
+  function sortHand(hand) {
+    var order = { H: 0, S: 1, D: 2, C: 3 };
+    return hand.slice().sort(function (a, b) {
+      return suitOf(a) !== suitOf(b) ? order[suitOf(a)] - order[suitOf(b)] : RANKS.indexOf(a.slice(0, -1)) - RANKS.indexOf(b.slice(0, -1));
+    });
+  }
+
+  var api = { SUITS: SUITS, suitOf: suitOf, rankOf: rankOf, isTrick: isTrick, handSize: handSize, newGame: newGame,
+    legalCards: legalCards, apply: apply, botMove: botMove, waitingSeat: waitingSeat, redact: redact, sortHand: sortHand };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.SwitchGame = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
 <script>(function () {
   'use strict';
-  var E = window.TwentyFive, T = window.ThirtyOne;
-  var GAME_NAME = { '25': 'Twenty-Five', '31': 'Thirty-One' };
+  var E = window.TwentyFive, T = window.ThirtyOne, S = window.SwitchGame;
+  var GAME_NAME = { '25': 'Twenty-Five', '31': 'Thirty-One', 'sw': 'Switch' };
+  var GAMES = ['25', '31', 'sw'];
   var ENG = {
     '25': {
       newGame: E.newGame, apply: E.apply, botMove: E.botMove,
@@ -715,9 +875,10 @@ button { cursor: pointer; }
         return G;
       }
     },
-    '31': T
+    '31': T,
+    'sw': S
   };
-  function gameOf(G) { return G && G.game === '31' ? '31' : '25'; }
+  function gameOf(G) { return G && ENG[G.game] ? G.game : '25'; }
   function eng(G) { return ENG[gameOf(G)]; }
   var $ = function (id) { return document.getElementById(id); };
   var SYM = { H: '♥︎', D: '♦︎', C: '♣︎', S: '♠︎' };
@@ -853,7 +1014,7 @@ button { cursor: pointer; }
       var G2 = app.Gfull, s = -1;
       G2.players.forEach(function (x, i) { if (x.id === conn.pid) s = i; });
       if (s < 0) return;
-      var a = { type: d.a.type, seat: s, card: d.a.card, discard: d.a.discard, from: d.a.from };
+      var a = { type: d.a.type, seat: s, card: d.a.card, discard: d.a.discard, from: d.a.from, suit: d.a.suit };
       if (a.type === 'deal' && s !== eng(G2).waitingSeat(G2)) return;
       if (['rob', 'pass', 'play', 'deal', 'draw', 'discard', 'knock'].indexOf(a.type) === -1) return;
       hostApply(a, true);
@@ -914,7 +1075,7 @@ button { cursor: pointer; }
   function takeState(lobby, G) {
     var prev = app.G;
     app.lobby = lobby; app.G = G;
-    if (!prev || !G || prev.seq !== G.seq || prev.gameNo !== G.gameNo) { app.selected = null; app.robbing = false; }
+    if (!prev || !G || prev.seq !== G.seq || prev.gameNo !== G.gameNo) { app.selected = null; app.robbing = false; app.pickSuit = null; }
     if (G) { if (app.view !== 'game') show('game'); renderGame(); }
     else { if (app.view !== 'lobby') show('lobby'); renderLobby(); }
   }
@@ -935,7 +1096,7 @@ button { cursor: pointer; }
         '<button class="btn" data-act="add-bot"' + (n >= 10 ? ' disabled' : '') + '>Add a computer player</button>'
       : '';
     var game = host ? net.game : (L ? L.game : '25');
-    $('game-pick').innerHTML = host ? ['25', '31'].map(function (g) {
+    $('game-pick').innerHTML = host ? GAMES.map(function (g) {
       return '<button data-act="pick-game" data-game="' + g + '" aria-pressed="' + (g === game) + '">' + GAME_NAME[g] + '</button>';
     }).join('') : (L ? '<p class="note">Tonight\'s game is <b>' + GAME_NAME[game] + '</b>.</p>' : '');
     $('invite').hidden = !host;
@@ -992,7 +1153,7 @@ button { cursor: pointer; }
     var next;
     try { next = eng(app.G).apply(app.G, a); } catch (e) { toast(e.message); return; }
     next.gameNo = app.G.gameNo || 1;
-    app.G = next; app.selected = null; app.robbing = false; renderGame(); driveBots();
+    app.G = next; app.selected = null; app.robbing = false; app.pickSuit = null; renderGame(); driveBots();
   }
   function playAgain(game) {
     var G = full(); if (!G || !isHost()) return;
@@ -1010,7 +1171,7 @@ button { cursor: pointer; }
     if (seat < 0 || !G.players[seat].bot) return;
     var key = stateKey(G); if (app.botKey === key) return; app.botKey = key;
     var wait = G.phase === 'handEnd' ? 3000 : G.phase === 'roundEnd' ? 4500
-      : gameOf(G) === '31' ? (G.step === 'discard' ? 900 : 1300) : (!G.trick.length && G.lastTrick ? 2200 : 1000);
+      : gameOf(G) === 'sw' ? 1400 : gameOf(G) === '31' ? (G.step === 'discard' ? 900 : 1300) : (!G.trick.length && G.lastTrick ? 2200 : 1000);
     setTimeout(function () {
       var now = full(); if (!now || stateKey(now) !== key) return;
       act(eng(now).botMove(now, seat));
@@ -1024,8 +1185,9 @@ button { cursor: pointer; }
     if (gameOf(G) === '31' && G.phase === 'play' && G.turn === seat && G.step === 'discard') hostApply(T.botMove(G, seat));
   }
   function againButtons(G) {
-    var other = gameOf(G) === '25' ? '31' : '25';
-    return '<button class="btn primary" data-act="again">Play again</button><button class="btn" data-act="again" data-game="' + other + '">Switch to ' + GAME_NAME[other] + '</button>';
+    return '<button class="btn primary" data-act="again">Play again</button>' + GAMES.filter(function (g) { return g !== gameOf(G); }).map(function (g) {
+      return '<button class="btn small" data-act="again" data-game="' + g + '">Play ' + GAME_NAME[g] + '</button>';
+    }).join('');
   }
   function coverButton(G, me) {
     var ws = waitingSeat(G);
@@ -1043,6 +1205,7 @@ button { cursor: pointer; }
   function renderGame() {
     var G = app.G; if (!G) return;
     if (gameOf(G) === '31') { render31(G); return; }
+    if (gameOf(G) === 'sw') { renderSw(G); return; }
     var n = G.players.length, me = mySeat(), t = G.trump;
     var nm = function (s) { return s === me ? 'You' : esc(G.players[s].name); };
     var hostName = app.lobby ? esc(app.lobby.hostName) : 'the host';
@@ -1219,9 +1382,89 @@ button { cursor: pointer; }
     else { app.selected = c; renderGame(); }
   }
 
+  /* ---------- Switch view ---------- */
+  function rankWord(c) { return { A: 'ace', J: 'jack', Q: 'queen', K: 'king' }[E.rankOf(c)] || E.rankOf(c); }
+  function renderSw(G) {
+    var n = G.players.length, me = mySeat();
+    var nm = function (s) { return s === me ? 'You' : esc(G.players[s].name); };
+    var hostName = app.lobby ? esc(app.lobby.hostName) : 'the host';
+    var playing = G.phase === 'play', myTurn = playing && G.turn === me;
+    var cnt = function (s) { return G.counts ? G.counts[s] : G.hands['s' + s].length; };
+    var top = G.pile[G.pile.length - 1];
+    var suitName = E.SUIT_NAME[G.suit].toLowerCase();
+
+    $('trumpbox').innerHTML = '<span><b>Switch</b><small>' + (G.dir === 1 ? 'Turns run forward \u25B6' : '\u25C0 Turns run backward') + '</small></span>';
+
+    $('players').innerHTML = G.players.map(function (p, s) {
+      var k = cnt(s);
+      return '<div class="chip' + (G.turn === s ? ' turn' : '') + (p.away ? ' away' : '') + '"><div class="nm"><span>' + esc(p.name) + '</span>' +
+        (s === me ? '<b class="tag me">you</b>' : '') + (p.away ? '<b class="tag me">away</b>' : '') +
+        '</div><div class="pips"><em class="count' + (k === 1 ? ' last' : '') + '">' + (k === 1 ? 'Last card' : k + ' cards') + '</em></div></div>';
+    }).join('');
+
+    var status = '', sub = '', actions = '';
+    var hand = me >= 0 ? G.hands['s' + me] : [];
+    var legal = myTurn ? S.legalCards(G, me) : [];
+    var stockN = G.stockCount != null ? G.stockCount : G.stock.length + G.pile.length - 1;
+    $('trick').innerHTML =
+      '<div class="play pile"><button class="pilebtn" data-act="draw-stock"' + (myTurn && !app.pickSuit ? '' : ' disabled') + ' aria-label="Pick up"><span class="card back"></span></button><span>' +
+      (playing && G.pending > 0 ? 'Pick up ' + G.pending : 'Deck, ' + stockN + ' left') + '</span></div>' +
+      '<div class="play pile">' + cardHTML(top) + '<span>' + (E.rankOf(top) === 'A' ? 'Suit is ' + SYM[G.suit] + ' ' + suitName : 'Top card') + '</span></div>';
+
+    var lm = G.lastMove, last = '';
+    if (lm && lm.card) {
+      var r = E.rankOf(lm.card);
+      last = nm(lm.seat) + ' played the ' + cardText(lm.card) +
+        (r === 'A' ? ' and called ' + E.SUIT_NAME[lm.suit].toLowerCase() : r === '8' && lm.skipped >= 0 ? ', skipping ' + (lm.skipped === me ? 'you' : nm(lm.skipped)) : r === 'J' ? ' and changed direction' : lm.stopped ? ' and stopped the five' : '') + '.';
+    } else if (lm) last = nm(lm.seat) + (lm.drew ? ' picked up ' + (lm.drew === 1 ? 'a card' : lm.drew + ' cards') : ' had nothing to pick up') + '.';
+
+    if (!playing) {
+      status = (G.winner === me ? 'You are out first and win' : nm(G.winner) + ' is out first and wins') + ' the game.';
+      if (isHost()) actions = againButtons(G); else sub = 'Waiting for ' + hostName + ' to start another game.';
+    } else if (myTurn && app.pickSuit) {
+      status = 'Which suit do you want?';
+      actions = S.SUITS.map(function (s) {
+        return '<button class="btn suitbtn" data-act="ace-suit" data-suit="' + s + '" aria-label="' + E.SUIT_NAME[s] + '" style="color:' + (E.isRed(s) ? '#ff8f85' : 'var(--chalk)') + '">' + SYM[s] + '</button>';
+      }).join('') + '<button class="btn small" data-act="ace-cancel">Cancel</button>';
+    } else if (myTurn) {
+      if (G.pending > 0) status = G.pendingType === '2' ? 'Pick up ' + G.pending + ', or play a 2 to pass it on.' : 'Pick up 5, or stop it with the king of diamonds.';
+      else status = 'Your turn. Play ' + suitName + (E.rankOf(top) === 'A' ? ' or an ace' : ', another ' + rankWord(top) + ' or an ace') + '.';
+      sub = hand.length === 1 && S.isTrick(hand[0]) ? 'You cannot finish on a trick card. Tap the deck to pick up.'
+        : !legal.length ? 'Nothing you can play. Tap the deck to pick up.'
+        : app.selected ? 'Tap the card again to play it.' : last;
+    } else { status = 'Waiting for ' + nm(G.turn) + '.'; sub = last; }
+    actions += coverButton(G, me);
+    $('status').innerHTML = status; $('sub').innerHTML = sub; $('sub').hidden = !sub; $('actions').innerHTML = actions;
+
+    var h = $('hand');
+    if (me < 0) { h.style.gridTemplateColumns = '1fr'; h.innerHTML = '<p class="note">You are watching this table.</p>'; return; }
+    var sorted = S.sortHand(hand);
+    h.style.gridTemplateColumns = 'repeat(' + Math.min(Math.max(sorted.length, 1), 6) + ', minmax(0, 78px))';
+    h.innerHTML = sorted.length ? sorted.map(function (c) {
+      return cardHTML(c, (myTurn && legal.indexOf(c) === -1 ? 'dim' : '') + (app.selected === c ? ' sel' : ''), 'button');
+    }).join('') : '<p class="note">No cards left. You are out.</p>';
+  }
+  function tapSw(c) {
+    var G = app.G, me = mySeat();
+    if (G.phase !== 'play') return;
+    if (G.turn !== me) { toast('Hold on, it is not your turn.'); return; }
+    if (app.pickSuit) return;
+    var hand = G.hands['s' + me];
+    if (S.legalCards(G, me).indexOf(c) === -1) {
+      toast(hand.length === 1 && S.isTrick(c) ? 'You cannot finish on a trick card.'
+        : G.pending > 0 ? (G.pendingType === '2' ? 'Only a 2 can pass this on.' : 'Only the king of diamonds stops the five.')
+        : 'That card does not match. Play ' + E.SUIT_NAME[G.suit].toLowerCase() + ', the same number or an ace.');
+      return;
+    }
+    if (app.selected !== c) { app.selected = c; renderGame(); return; }
+    if (E.rankOf(c) === 'A') { app.pickSuit = c; renderGame(); }
+    else act({ type: 'play', seat: me, card: c });
+  }
+
   function tapCard(c) {
     var G = app.G, me = mySeat(); if (!G || me < 0) return;
     if (gameOf(G) === '31') { tap31(c); return; }
+    if (gameOf(G) === 'sw') { tapSw(c); return; }
     if (app.robbing) { act({ type: 'rob', seat: me, discard: c }); return; }
     if (G.phase !== 'play' || G.turn !== me) { toast(G.phase === 'play' ? 'Hold on, it is not your turn.' : 'No card to play just now.'); return; }
     if (E.legalCards(G.hands['s' + me], G.trick, G.trump).indexOf(c) === -1) {
@@ -1234,7 +1477,7 @@ button { cursor: pointer; }
   /* ---------- Rules sheet ---------- */
   function renderRules() {
     var g = app.G ? gameOf(app.G) : app.kind === 'host' || app.kind === 'guest' ? ((app.lobby && app.lobby.game) || net.game) : $('pgame').value;
-    $('rules-25').hidden = g !== '25'; $('rules-31').hidden = g !== '31';
+    GAMES.forEach(function (x) { $('rules-' + x).hidden = g !== x; });
     var t = app.rulesSuit;
     $('suit-pick').innerHTML = E.SUITS.map(function (s) {
       return '<button data-act="suit" data-suit="' + s + '" aria-pressed="' + (s === t) + '" aria-label="' + E.SUIT_NAME[s] + '" style="color:' +
@@ -1288,6 +1531,8 @@ button { cursor: pointer; }
     else if (a === 'draw-stock') act({ type: 'draw', seat: me, from: 'stock' });
     else if (a === 'draw-pile') act({ type: 'draw', seat: me, from: 'pile' });
     else if (a === 'knock') act({ type: 'knock', seat: me });
+    else if (a === 'ace-suit') { var ace = app.pickSuit; app.pickSuit = null; if (ace) act({ type: 'play', seat: me, card: ace, suit: el.getAttribute('data-suit') }); }
+    else if (a === 'ace-cancel') { app.pickSuit = null; app.selected = null; renderGame(); }
     else if (a === 'cover') cover();
   });
   document.addEventListener('visibilitychange', function () {
